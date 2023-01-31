@@ -9,13 +9,13 @@ instance Functor f => Functor (Free f) where
   fmap f (Impure c) = Impure (fmap (fmap f) c)
 
 instance Functor f => Applicative (Free f) where
-  pure a = Pure a
+  pure = Pure
   (<*>) func (Pure a)   = fmap (\f -> f a) func
-  (<*>) func (Impure c) = Impure (fmap (\f -> func <*> f) c)
+  (<*>) func (Impure c) = Impure (fmap (func <*>) c)
 
 instance Functor f => Monad (Free f) where
   Pure k >>= f = f k
-  Impure c >>= f = Impure $ fmap (\x -> x >>= f) c
+  Impure c >>= f = Impure $ fmap (>>= f) c
 
 interpretFree ::
   Monad m

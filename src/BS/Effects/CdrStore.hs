@@ -32,4 +32,4 @@ runCdrStore ::
   => Sem (CdrStore ': r) a
   -> Sem r a
 runCdrStore = interpret $ \case
-  FetchCdrs accountId -> gets (\m -> m M.! accountId)
+  FetchCdrs accountId -> gets (M.! accountId)

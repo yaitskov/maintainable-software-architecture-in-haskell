@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import           BS.Effects.CdrStore
@@ -12,8 +11,8 @@ import           Data.ByteString.Char8    (unpack)
 import           Data.ByteString.Lazy     (toStrict)
 import           Data.Function            ((&))
 import           Data.IORef
-import           Data.IORef
 import qualified Data.Map                 as M
+import           Data.Maybe
 import           Data.UUID
 import           Data.UUID.V4
 import           FM.Fm
@@ -50,4 +49,4 @@ cdrs accountId =
   ]
   where
     cdr uuid callType duration =
-      Cdr (maybe nil id (fromString uuid)) accountId callType (Duration duration)
+      Cdr (fromMaybe nil(fromString uuid)) accountId callType (Duration duration)

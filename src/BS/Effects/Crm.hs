@@ -31,4 +31,4 @@ runCrm ::
   => Sem (Crm ': r) a
   -> Sem r a
 runCrm = interpret $ \case
-  GetProfile accountId -> gets (\m -> m M.! accountId)
+  GetProfile accountId -> gets (M.! accountId)

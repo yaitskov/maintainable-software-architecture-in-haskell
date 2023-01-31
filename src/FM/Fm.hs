@@ -3,6 +3,7 @@ module FM.Fm where
 
 import           Data.IORef
 import qualified Data.Map   as M
+import           Data.Maybe
 import           Data.UUID  (UUID)
 import           FM.Free
 
@@ -15,7 +16,7 @@ persist :: UUID -> Int -> Free Storage ()
 persist uuid i = Impure (Persist uuid i (Pure ()))
 
 fetch :: UUID -> Free Storage (Maybe Int)
-fetch uuid = Impure (Fetch uuid (\mi -> Pure mi))
+fetch uuid = Impure (Fetch uuid Pure)
 
 -- | take Int, fetch existing Int (if does not exist, default to zero)
 -- | add them, store the result, return result as text
@@ -23,10 +24,10 @@ doStuff :: UUID -> Int -> Free Storage String
 doStuff uuid i = do
   maybeOld <- fetch uuid
   let
-    oldI = maybe 0 id maybeOld
+    oldI = fromMaybe 0 maybeOld
     newI = oldI + i
   persist uuid newI
-  pure ("New value: " ++ (show newI))
+  pure ("New value: " ++ show newI)
 
 type InMemStorage = M.Map UUID Int
 
