@@ -27,6 +27,9 @@ main = execute >>= putStrLn.prettyPrint
     execute = generateInvoice accountId
       & upCasingAddressInterceptor
       & runCrm
+      & doubleNumberOfCalls
+      & doubleCallDurationInterceptor
+      & doubleNumberOfCalls
       & runCdrStore
       & runInvoiceStore
       & evalState @CrmMap (M.singleton accountId profile)

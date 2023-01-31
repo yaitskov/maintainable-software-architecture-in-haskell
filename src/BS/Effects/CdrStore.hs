@@ -20,6 +20,9 @@ data Cdr = Cdr
   , callDuration :: Duration
   }
 
+doubleCallDuration :: Cdr -> Cdr
+doubleCallDuration cdr = cdr { callDuration = 2 * callDuration cdr }
+
 data CdrStore m a where
   FetchCdrs :: AccountId -> CdrStore m [Cdr]
 
@@ -33,3 +36,20 @@ runCdrStore ::
   -> Sem r a
 runCdrStore = interpret $ \case
   FetchCdrs accountId -> gets (M.! accountId)
+
+doubleCallDurationInterceptor ::
+  forall r a.
+  Member CdrStore r =>
+  Sem r a ->
+  Sem r a
+doubleCallDurationInterceptor = intercept $ \case
+  FetchCdrs accountId -> do
+    cdrs <- fetchCdrs accountId
+    pure $ doubleCallDuration <$> cdrs
+
+doubleNumberOfCalls :: forall r a. Member CdrStore r => Sem r a -> Sem r a
+doubleNumberOfCalls = intercept $ \case
+  FetchCdrs accountId -> do
+    cdrs <- fetchCdrs accountId
+    pure $ cdrs <> cdrs
+
