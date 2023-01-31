@@ -26,6 +26,9 @@ data Address = Address
   }
   deriving stock (Show, Generic)
 
+upCaseCity :: Address -> Address
+upCaseCity adr = adr { city = toUpper $ city adr }
+
 instance FromJSON Address
 instance ToJSON Address
 

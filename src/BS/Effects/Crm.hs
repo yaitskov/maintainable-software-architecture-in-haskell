@@ -1,11 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 module BS.Effects.Crm where
 
-import           BS.Types       (AccountId, Address, Cent)
+import           BS.Types       (AccountId, Address, Cent, upCaseCity)
 import qualified Data.Map       as M
 import           Data.Text
 import           Polysemy
 import           Polysemy.State
+
 
 data Plan = Plan
   { voiceCost :: Cent
@@ -32,3 +33,14 @@ runCrm ::
   -> Sem r a
 runCrm = interpret $ \case
   GetProfile accountId -> gets (M.! accountId)
+
+upCasingAddressInterceptor ::
+  forall r a.
+  Member Crm r =>
+  Sem r a ->
+  Sem r a
+upCasingAddressInterceptor =
+  intercept $ \case
+    GetProfile accountId -> do
+      pro <- getProfile accountId
+      pure pro { address = upCaseCity $ address pro }

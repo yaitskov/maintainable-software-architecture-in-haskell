@@ -25,6 +25,7 @@ main = execute >>= putStrLn.prettyPrint
   where
     accountId = AccountId 1000
     execute = generateInvoice accountId
+      & upCasingAddressInterceptor
       & runCrm
       & runCdrStore
       & runInvoiceStore
