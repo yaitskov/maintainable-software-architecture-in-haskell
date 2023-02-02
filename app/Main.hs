@@ -19,9 +19,13 @@ import           FM.Fm
 import           FM.Free
 import           Polysemy
 import           Polysemy.State
+import           WhatIsListOutput
 
 main :: IO ()
-main = execute >>= putStrLn.prettyPrint
+main =
+  if 0 < 0
+    then execute >>= putStrLn.prettyPrint
+    else runAll
   where
     accountId = AccountId 1000
     execute = generateInvoice accountId
