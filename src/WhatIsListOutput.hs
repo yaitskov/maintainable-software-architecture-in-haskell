@@ -1,5 +1,9 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE FlexibleInstances  #-}
 {-# LANGUAGE TemplateHaskell #-}
+-- {-# LANGUAGE OverlappingInstances #-}
+
 module WhatIsListOutput where
 
 import Data.Function ((&))
@@ -7,6 +11,7 @@ import Data.Maybe
 import Polysemy
 import Polysemy.Output
 import Polysemy.Input
+import Polysemy.Tagged
 
 data Log m a where
   LogInfo :: String -> Log m ()
@@ -31,13 +36,39 @@ out7 =
 outPi :: Member (Output Double) r => Sem r ()
 outPi = output pi
 
+-- type OutTaggedPi = Tagged "pi" (Output Double)
+outUnit :: Member (Output ()) r => Sem r ()
+outUnit = output ()
+
 incIntInput :: (Member (Input Int) r, Member (Output Int) r) => Sem r ()
 incIntInput = do
   i <- input
   output $ i + 1
 
+class FlatTuple a b where
+  flatuple :: a -> b
+
+instance FlatTuple (a, (b, c)) (a, b, c) where
+  flatuple (a, (b, c)) = (a, b, c)
+
+instance FlatTuple (a, (b, (c, d))) (a, b, c, d) where
+  flatuple (a, (b, (c, d))) = (a, b, c, d)
+
+instance FlatTuple (a, b) (a,b) where
+  flatuple (a, b) = (a, b)
+
 
 runAll :: IO ()
 runAll = do
-  is <- fst <$> (myBusiness & runInputConst 100 & runOutputList @Int & runOutputList @Double & runLog & runM)
+  -- is :: ([()], ([Double], ([Int], ())))
+  is :: ([()], [Double], [Int], ()) <- flatuple <$> (mb
+    & runInputConst 100
+    & runOutputList @Int
+    & runOutputList @Double
+    & runOutputList @()
+    & runLog
+    & runM)
   putStrLn $ "Is = " <> show is
+  where
+    mb :: Members [Output Int, Output Double, Output ()] r => Sem r ()
+    mb = out7 >> outPi >> outUnit
